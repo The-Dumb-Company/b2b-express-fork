@@ -63,3 +63,86 @@ export const logout = (req, res) => {
         user: req.user,
       });
   };
+
+  export const getProducts = async (req, res, next) => {
+    try{
+        const query = "SELECT * FROM products";
+        const gettingProducts = await pool.query(query);
+        const products = gettingProducts.rows;
+        
+        if (!products) {
+          return next(new ErrorHandler("No products found", 404));
+        }
+  
+        res.status(200).json({
+          success: true,
+          products
+        })
+    } catch(error) {
+        next(error);
+    }
+  }
+  
+  export const searchProducts = async (req, res, next) => {
+    try {
+        const { category, product_name } = req.query;
+
+        // Basic validation: at least one search parameter should be provided
+        if (!category && !product_name) {
+            return res.status(400).json({ success: false, message: "Please provide a search term (category or product_name)." });
+        }
+
+        let query = "";
+        const values = [];
+
+        // if (category && product_name) {
+        //   query += "SELECT * FROM products WHERE category = $1 AND name ILIKE $2";
+        //   values.push(category);
+        //   values.push(`%{product_name}%`);
+        // }
+        if (category) {
+            query += "SELECT * FROM products WHERE category = $1";
+            values.push(category);
+        }
+        else if (product_name) {
+            query += "SELECT * FROM products WHERE name ILIKE $1";
+            values.push(`%{product_name}%`);      
+        }
+
+        // Execute the query
+        const result = await pool.query(query, values);
+
+        // Check if any products are found
+        if (result.rows.length === 0) {
+            return res.status(404).json({ success: false, message: "No products found." });
+        }
+
+        // Return the found products
+        res.status(200).json({
+            success: true,
+            products: result.rows,
+        });
+    } catch (error) {
+        next(error);  // Pass error to the error handling middleware
+    }
+};
+
+export const getCategories = async (req, res, next) => {
+  try {
+      const query = "SELECT DISTINCT category FROM products ORDER BY category ASC";
+      const result = await pool.query(query);
+
+      if (result.rows.length === 0) {
+          return res.status(404).json({ success: false, message: "No categories found" });
+      }
+
+      const categories = result.rows;
+
+      res.status(200).json({
+          success: true,
+          categories,
+      });
+  } catch (error) {
+      next(error);
+  }
+};
