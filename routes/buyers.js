@@ -10,7 +10,7 @@ router.post("/signin", signin);
 
 router.get("/logout", logout);
 
-routers.get("/me", isAuthenticated, getMyProfile);
+router.get("/me", isAuthenticated, getMyProfile);
 
 router.get("/products", isAuthenticated, getProducts);
 
