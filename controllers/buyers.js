@@ -64,7 +64,14 @@ export const logout = (req, res) => {
       });
   };
 
-  export const getProducts = async (req, res, next) => {
+export const getMyProfile = (req, res) => {
+    res.status(200).json({
+        success: true,
+        user: req.user,
+    });  
+} 
+
+export const getProducts = async (req, res, next) => {
     try{
         const query = "SELECT * FROM products";
         const gettingProducts = await pool.query(query);

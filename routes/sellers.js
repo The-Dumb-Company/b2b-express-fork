@@ -1,5 +1,5 @@
 import express from "express";
-import { signup, signin, logout, addProduct, deleteProduct, getMyProducts, updateProduct } from "../controllers/sellers.js";
+import { signup, signin, logout, addProduct, deleteProduct, getMyProducts, updateProduct, getMyProfile } from "../controllers/sellers.js";
 import { isAuthenticated } from "../middlewares/auth.js";
 
 const router = express.Router();
@@ -9,6 +9,8 @@ router.post("/signup", signup);
 router.post("/signin", signin);
 
 router.get("/logout", logout);
+
+router.get("/me", isAuthenticated, getMyProfile);
 
 router.post("/addProduct", isAuthenticated, addProduct);
 
