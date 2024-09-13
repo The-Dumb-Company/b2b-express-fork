@@ -90,6 +90,7 @@ export const logout = (req, res) => {
         res.status(201).json({
             success: true,
             message: "Product added successfully",
+            product
           });
     } catch (error) {
           next(error);
@@ -124,6 +125,7 @@ export const logout = (req, res) => {
         res.status(200).json({
             success: true,
             message: "Product updated successfully",
+            product
           });
     } catch (error) {
           next(error);
