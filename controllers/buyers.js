@@ -90,31 +90,44 @@ export const getProducts = async (req, res, next) => {
     }
   }
   
-  export const searchProducts = async (req, res, next) => {
+  export const searchByCategory = async (req, res, next) => {
     try {
-        const { category, product_name } = req.query;
+        const { category } = req.query;
 
-        // Basic validation: at least one search parameter should be provided
-        if (!category && !product_name) {
-            return res.status(400).json({ success: false, message: "Please provide a search term (category or product_name)." });
+        if (!category) {
+            return res.status(400).json({ success: false, message: "Please provide a search term." });
         }
 
-        let query = "";
-        const values = [];
+        const query = "SELECT * FROM products WHERE category = $1";      
 
-        // if (category && product_name) {
-        //   query += "SELECT * FROM products WHERE category = $1 AND name ILIKE $2";
-        //   values.push(category);
-        //   values.push(`%{product_name}%`);
-        // }
-        if (category) {
-            query += "SELECT * FROM products WHERE category = $1";
-            values.push(category);
+        // Execute the query
+        const result = await pool.query(query, [category]);
+
+        // Check if any products are found
+        if (result.rows.length === 0) {
+            return res.status(404).json({ success: false, message: "No products found." });
         }
-        else if (product_name) {
-            query += "SELECT * FROM products WHERE name ILIKE $1";
-            values.push(`%{product_name}%`);      
+
+        // Return the found products
+        res.status(200).json({
+            success: true,
+            products: result.rows,
+        });
+    } catch (error) {
+        next(error);  
+    }
+};
+
+export const searchByName= async (req, res, next) => {
+    try {
+        const { name } = req.query;
+
+        if (!name) {
+            return res.status(400).json({ success: false, message: "Please provide a search term." });
         }
+
+        const query = "SELECT * FROM products WHERE name ILIKE $1";
+        const values = [`%${name}%`];      
 
         // Execute the query
         const result = await pool.query(query, values);
@@ -130,7 +143,7 @@ export const getProducts = async (req, res, next) => {
             products: result.rows,
         });
     } catch (error) {
-        next(error);  // Pass error to the error handling middleware
+        next(error);  
     }
 };
 

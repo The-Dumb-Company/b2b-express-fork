@@ -1,5 +1,5 @@
 import express from "express";
-import { signup, signin, logout,getProducts, searchProducts, getCategories, getMyProfile } from "../controllers/buyers.js";
+import { signup, signin, logout,getProducts, searchByName, searchByCategory, getCategories, getMyProfile } from "../controllers/buyers.js";
 import { isAuthenticated } from "../middlewares/auth.js";
 
 const router = express.Router();
@@ -14,7 +14,9 @@ router.get("/me", isAuthenticated, getMyProfile);
 
 router.get("/products", isAuthenticated, getProducts);
 
-router.get("/products/search", isAuthenticated, searchProducts);
+router.get("/products/searchByCategory", isAuthenticated, searchByCategory);
+
+router.get("/products/searchByName", isAuthenticated, searchByName);
 
 router.get("/products/getCategories", isAuthenticated, getCategories);
 

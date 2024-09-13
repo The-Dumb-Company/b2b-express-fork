@@ -75,16 +75,16 @@ export const logout = (req, res) => {
   export const addProduct = async (req, res, next) => {
     try {
         
-        const { productName, productDesc, category, price, discount } = req.body;
+        const { name, description, category, price, discount } = req.body;
 
         const seller_email = req.user.email;
 
-        if (!productName || !productDesc || !price || !discount || !category) {
+        if (!name || !description || !price || !discount || !category) {
             return next(new ErrorHandler("Please fill all the fields", 400));
         }
 
         const insertProduct = "INSERT INTO products (name, description, category, price, discount, seller_email) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *";
-        const insertedProduct = await pool.query(insertProduct, [productName, productDesc, category, price, discount, seller_email]);
+        const insertedProduct = await pool.query(insertProduct, [name, description, category, price, discount, seller_email]);
 
         const product = insertedProduct.rows[0];
         res.status(201).json({
@@ -100,11 +100,11 @@ export const logout = (req, res) => {
   export const updateProduct = async (req, res, next) => {
     try {
         
-        const { productName, productDesc, category, price, discount } = req.body;
+        const { name, description, category, price, discount } = req.body;
 
         const productId = req.params.id;
 
-        if (!productName || !productDesc || !price || !discount || !category) {
+        if (!name || !description || !price || !discount || !category) {
             return next(new ErrorHandler("Please fill all the fields", 400));
         }
 
@@ -118,7 +118,7 @@ export const logout = (req, res) => {
         }
 
         const updateProduct = "UPDATE products SET name = $1, description = $2, category = $3, price = $4, discount = $5 WHERE product_id = $6"
-        const updatedProduct = await pool.query(updateProduct, [productName, productDesc, category, price, discount, productId]);
+        const updatedProduct = await pool.query(updateProduct, [name, description, category, price, discount, productId]);
 
         product = updatedProduct.rows[0];
 
