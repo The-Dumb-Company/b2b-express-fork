@@ -1,13 +1,8 @@
 import { app } from "./app.js";
+import dotenv from 'dotenv';
 
-// import pool from "./data/database.js";
+dotenv.config();
 
-// pool.connect();
-
-// const result = await pool.query("SELECT * FROM sellers");
-// const row = result.rows[0];
-
-// console.log(row);
 
 app.listen(process.env.PORT, () => {
   console.log(

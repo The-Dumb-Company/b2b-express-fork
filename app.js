@@ -23,7 +23,7 @@ app.use(
 
 
 app.get("/", (req, res) => {
-  res.send("Hello, World!");
+  res.send("Hello, Welcome to b2b marketplace api");
 });
 
 //using routes

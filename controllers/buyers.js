@@ -2,6 +2,8 @@ import ErrorHandler from "../utils/error.js";
 import bcrypt from "bcrypt";
 import { sendCookie } from "../utils/features.js";
 import pool from "../data/database.js"
+import xss from "xss";
+import validator from "validator";
 
 pool.connect();
 
@@ -9,15 +11,33 @@ export const signup = async (req, res, next) => {
     try {
         const {name, business_name, email, password} = req.body;
 
+        //Sanitize and Validate Input
+        const sanitizedEmail = xss(email.trim());
+        const sanitizedName = xss(name.trim());
+        const sanitizedBusinessName = xss(business_name.trim());
+
+        if (!validator.isEmail(sanitizedEmail)) {
+            return next(new ErrorHandler("Invalid email address", 400));
+        }
+
+        if (validator.isEmpty(sanitizedName) || validator.isEmpty(sanitizedBusinessName) || validator.isEmpty(password)) {
+            return next(new ErrorHandler("All fields are required", 400));
+        }
+
+        if (!validator.isLength(password, { min: 6 })) {
+            return next(new ErrorHandler("Password must be at least 6 characters long", 400));
+        }
+
+        //Check if Buyer already exists
         const query = "SELECT * FROM buyers WHERE email = $1";
-        const result  = await pool.query(query, [email]);
+        const result  = await pool.query(query, [sanitizedEmail]);
 
         if (result.rows.length !== 0) return next(new ErrorHandler("Buyer already exists", 400));
 
+        // Hash password and insert the Buyer
         const hashedPassword = await bcrypt.hash(password, 10);
-
         const insertQuery = "INSERT INTO buyers (name, email, password, business_name) VALUES ($1, $2, $3, $4) RETURNING *";
-        const insertedUser = await pool.query(insertQuery, [name, email, hashedPassword, business_name]);
+        const insertedUser = await pool.query(insertQuery, [sanitizedName, sanitizedEmail, hashedPassword, sanitizedBusinessName]);
 
         const user = insertedUser.rows[0];
 
@@ -32,13 +52,27 @@ export const signin = async (req, res, next) => {
     try{
         const {email, password} = req.body;
 
+        // Sanitize and validate input
+        const sanitizedEmail = xss(email.trim());
+        const sanitizedPassword = xss(password.trim());
+
+        if (!validator.isEmail(sanitizedEmail)) {
+            return next(new ErrorHandler("Invalid email address", 400));
+        }
+
+        if (validator.isEmpty(sanitizedPassword)) {
+            return next(new ErrorHandler("Password is required", 400));
+        }
+
+        // Check if Buyer exists
         const query = "SELECT * FROM buyers WHERE email = $1";
-        let checkUser = await pool.query(query, [email]);   
+        let checkUser = await pool.query(query, [sanitizedEmail]);   
         const user = checkUser.rows[0];
 
         if (!user) return next(new ErrorHandler("Buyer does not exist", 400));
 
-        const isMatch = await bcrypt.compare(password, user.password);
+        // Verify password
+        const isMatch = await bcrypt.compare(sanitizedPassword, user.password);
 
         if(!isMatch) {
             return next(new ErrorHandler("Invalid Email or Password", 400));
@@ -62,8 +96,9 @@ export const logout = (req, res) => {
         success: true,
         user: req.user,
       });
-  };
+};
 
+// Get Buyer details
 export const getMyProfile = (req, res) => {
     res.status(200).json({
         success: true,
@@ -71,6 +106,7 @@ export const getMyProfile = (req, res) => {
     });  
 } 
 
+// Get all products
 export const getProducts = async (req, res, next) => {
     try{
         const query = "SELECT * FROM products";
@@ -88,9 +124,10 @@ export const getProducts = async (req, res, next) => {
     } catch(error) {
         next(error);
     }
-  }
-  
-  export const searchByCategory = async (req, res, next) => {
+}
+
+// Search for products based on category
+export const searchByCategory = async (req, res, next) => {
     try {
         const { category } = req.query;
 
@@ -118,6 +155,7 @@ export const getProducts = async (req, res, next) => {
     }
 };
 
+// Search for products based on name likeness
 export const searchByName= async (req, res, next) => {
     try {
         const { name } = req.query;
@@ -147,6 +185,7 @@ export const searchByName= async (req, res, next) => {
     }
 };
 
+// Get all the distinct categories of products present
 export const getCategories = async (req, res, next) => {
   try {
       const query = "SELECT DISTINCT category FROM products ORDER BY category ASC";
