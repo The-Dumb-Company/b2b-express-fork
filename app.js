@@ -13,15 +13,14 @@ config({ path: "./data/config.env" });
 // Using middlewares
 app.use(express.json());
 app.use(cookieParser());
-// app.use(
-//   cors({
-//     origin: "https://b2b-marketplace-omega.vercel.app",
-//     methods: ["GET", "POST", "PUT", "DELETE"],
-//     credentials: true, //need to set this true to be able to send cookies and track them
-//   })
-// );
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true, //need to set this true to be able to send cookies and track them
+  })
+);
 
-app.use(cors());
 
 app.get("/", (req, res) => {
   res.send("Hello, Welcome to b2b marketplace api");
