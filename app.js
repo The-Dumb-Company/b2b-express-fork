@@ -15,7 +15,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: [process.env.FRONTEND_URL],
+    origin: "https://b2b-marketplace-omega.vercel.app",
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true, //need to set this true to be able to send cookies and track them
   })
