@@ -327,6 +327,8 @@ In case of an error, the API will return the following response format:
 
 ---
 
+hehehehhe
+
 ### Authentication Middleware
 
 **isAuthenticated**: This middleware ensures that the user making the request is authenticated. It should be applied to all routes requiring authentication. If the user is not authenticated, the API will return a `401 Unauthorized` error.
